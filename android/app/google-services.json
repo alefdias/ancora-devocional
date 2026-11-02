@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "256081882572",
+    "project_id": "ancora-7798e",
+    "storage_bucket": "ancora-7798e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:256081882572:android:33bbf40e84159992280169",
+        "android_client_info": {
+          "package_name": "com.ancora.devocional"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "256081882572-nnao2li923d9f9gao8qmar28riqr5i56.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ancora.devocional",
+            "certificate_hash": "179645cc5bd4c6fbd17e23b05877dc828eba5a95"
+          }
+        },
+        {
+          "client_id": "256081882572-7aivc39fnl48r3kt3jtr4jleto72jtpl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvvtan1ZakDKc1sG4H71hO-qg0_GH5Mfc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "256081882572-7aivc39fnl48r3kt3jtr4jleto72jtpl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
