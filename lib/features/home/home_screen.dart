@@ -40,6 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final devotional = devotionalForDate(DateTime.now());
     final streak = ref.watch(streakProvider);
     final name = ref.watch(nameProvider);
+    final religion = ref.watch(religionProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -77,6 +78,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
+          if (religion == 'catolico') ...[
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.goldSoft,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.gold),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.church_rounded, color: AppColors.navy, size: 22),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Conteúdo católico em breve! Por enquanto, você verá o devocional evangélico.',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.navy,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           Text(
             _todayLabel(),
             style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),

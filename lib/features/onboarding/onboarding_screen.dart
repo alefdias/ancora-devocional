@@ -14,6 +14,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _nameController = TextEditingController();
+  String _religion = 'evangelico';
 
   @override
   void dispose() {
@@ -26,6 +27,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     if (name.isNotEmpty) {
       ref.read(nameProvider.notifier).set(name);
     }
+    ref.read(religionProvider.notifier).set(_religion);
     context.go('/');
   }
 
@@ -33,14 +35,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Spacer(),
-              const Icon(Icons.anchor_rounded, color: AppColors.gold, size: 64),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
+              const Icon(Icons.anchor_rounded, color: AppColors.gold, size: 60),
+              const SizedBox(height: 16),
               const Text(
                 'Bem-vindo(a) ao Âncora',
                 textAlign: TextAlign.center,
@@ -50,7 +52,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   color: AppColors.navy,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               const Text(
                 'Um devocional por dia, com áudio e um espaço para anotar sua caminhada.',
                 textAlign: TextAlign.center,
@@ -70,11 +72,108 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   prefixIcon: Icon(Icons.person_outline_rounded),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 24),
+              const Text(
+                'Como você quer seu devocional?',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.navy,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ReligionCard(
+                      title: 'Evangélico',
+                      subtitle: 'Versículo + reflexão diária',
+                      icon: Icons.menu_book_rounded,
+                      selected: _religion == 'evangelico',
+                      onTap: () => setState(() => _religion = 'evangelico'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ReligionCard(
+                      title: 'Católico',
+                      subtitle: 'Em breve',
+                      icon: Icons.church_rounded,
+                      selected: _religion == 'catolico',
+                      onTap: () => setState(() => _religion = 'catolico'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
               ElevatedButton(onPressed: _start, child: const Text('Começar')),
               const SizedBox(height: 24),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReligionCard extends StatelessWidget {
+  const _ReligionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.navy : AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? AppColors.navy : AppColors.border,
+            width: 2,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 30,
+              color: selected ? AppColors.gold : AppColors.textSecondary,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+                color: selected ? Colors.white : AppColors.navy,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: selected
+                    ? Colors.white.withValues(alpha: 0.8)
+                    : AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );

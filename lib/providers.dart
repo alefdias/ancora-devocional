@@ -47,6 +47,25 @@ class NameNotifier extends Notifier<String> {
 final nameProvider = NotifierProvider<NameNotifier, String>(NameNotifier.new);
 
 // ---------------------------------------------------------------------------
+// Afiliação religiosa (evangelico | catolico)
+// ---------------------------------------------------------------------------
+class ReligionNotifier extends Notifier<String> {
+  static const _key = 'religion';
+
+  @override
+  String build() => ref.read(sharedPrefsProvider).getString(_key) ?? '';
+
+  void set(String value) {
+    state = value;
+    ref.read(sharedPrefsProvider).setString(_key, value);
+  }
+}
+
+final religionProvider = NotifierProvider<ReligionNotifier, String>(
+  ReligionNotifier.new,
+);
+
+// ---------------------------------------------------------------------------
 // Anotações
 // ---------------------------------------------------------------------------
 class NotesNotifier extends Notifier<List<Note>> {

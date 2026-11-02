@@ -12,6 +12,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final name = ref.watch(nameProvider);
     final isPremium = ref.watch(premiumProvider);
+    final religion = ref.watch(religionProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ajustes')),
@@ -20,11 +21,25 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           _SectionTitle('Perfil'),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.person_outline_rounded, color: AppColors.gold),
-              title: const Text('Nome'),
-              subtitle: Text(name.isEmpty ? 'Não definido' : name),
-              onTap: () => _editName(context, ref),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.person_outline_rounded, color: AppColors.gold),
+                  title: const Text('Nome'),
+                  subtitle: Text(name.isEmpty ? 'Não definido' : name),
+                  onTap: () => _editName(context, ref),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.menu_book_rounded, color: AppColors.gold),
+                  title: const Text('Afiliação religiosa'),
+                  subtitle: Text(
+                    religion == 'catolico' ? 'Católico (em breve)' : 'Evangélico',
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => _editReligion(context, ref),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -96,6 +111,43 @@ class SettingsScreen extends ConsumerWidget {
               Navigator.pop(ctx);
             },
             child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editReligion(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Afiliação religiosa'),
+        children: [
+          SimpleDialogOption(
+            onPressed: () {
+              ref.read(religionProvider.notifier).set('evangelico');
+              Navigator.pop(ctx);
+            },
+            child: const Row(
+              children: [
+                Icon(Icons.menu_book_rounded, color: AppColors.gold),
+                SizedBox(width: 12),
+                Text('Evangélico'),
+              ],
+            ),
+          ),
+          SimpleDialogOption(
+            onPressed: () {
+              ref.read(religionProvider.notifier).set('catolico');
+              Navigator.pop(ctx);
+            },
+            child: const Row(
+              children: [
+                Icon(Icons.church_rounded, color: AppColors.gold),
+                SizedBox(width: 12),
+                Text('Católico (em breve)'),
+              ],
+            ),
           ),
         ],
       ),
