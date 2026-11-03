@@ -1,90 +1,85 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
 import '../models.dart';
 
-/// Conteúdo PROVISÓRIO de devocionais.
-/// TODO: substituir pelos devocionais reais (a partir do PDF enviado).
-/// A função [devotionalForDate] seleciona um devocional por dia.
-const List<Devotional> _devotionals = [
-  Devotional(
-    id: 1,
-    verseRef: 'Salmos 46:1',
-    verse: 'Deus é o nosso refúgio e fortaleza, socorro bem presente na angústia.',
-    title: 'Um refúgio para hoje',
-    body:
-        'Em meio à correria e aos desafios, Deus se apresenta como um refúgio seguro. '
-        'Não precisamos carregar o peso sozinhos: podemos descansar na presença dEle. '
-        'Hoje, entregue a Ele aquilo que tem tirado a sua paz e confie no cuidado do Pai.',
-  ),
-  Devotional(
-    id: 2,
-    verseRef: 'Provérbios 3:5-6',
-    verse:
-        'Confia no Senhor de todo o teu coração e não te estribes no teu próprio entendimento.',
-    title: 'Confiar sem ver tudo',
-    body:
-        'Muitas vezes queremos entender tudo antes de dar o próximo passo. '
-        'Mas a fé nos convida a confiar mesmo quando o caminho não está claro. '
-        'Deus enxerga o que ainda não enxergamos e dirige os nossos passos com sabedoria.',
-  ),
-  Devotional(
-    id: 3,
+/// Biblioteca dos devocionais reais (366 dias), carregada do asset
+/// `assets/data/devotionals.json` — gerado a partir do livro "Âncora Devocional".
+class DevotionalLibrary {
+  DevotionalLibrary._();
+
+  static const _assetPath = 'assets/data/devotionals.json';
+
+  static List<Devotional> _all = const [];
+  static Map<int, Devotional> _byMonthDay = const {};
+
+  static bool get isLoaded => _all.isNotEmpty;
+  static int get count => _all.length;
+
+  /// Carrega o JSON uma única vez. Chamado no `main()` antes do `runApp`.
+  static Future<void> load({AssetBundle? bundle}) async {
+    if (_all.isNotEmpty) return;
+    try {
+      final raw = await (bundle ?? rootBundle).loadString(_assetPath);
+      final decoded = jsonDecode(raw) as List<dynamic>;
+      final list = decoded
+          .whereType<Map<String, dynamic>>()
+          .map(Devotional.fromJson)
+          .toList(growable: false);
+      if (list.isEmpty) return;
+      _all = list;
+      _byMonthDay = {
+        for (final d in list) d.month * 100 + d.dayOfMonth: d,
+      };
+    } catch (e) {
+      debugPrint('Falha ao carregar devocionais: $e');
+    }
+  }
+
+  /// Devocional do dia (busca por mês/dia; funciona em anos bissextos e comuns).
+  static Devotional forDate(DateTime date) {
+    if (_byMonthDay.isEmpty) return _fallback;
+
+    final exact = _byMonthDay[date.month * 100 + date.day];
+    if (exact != null) return exact;
+
+    // Segurança: se faltar o dia exato, usa o dia do ano mais próximo.
+    final dayOfYear = date.difference(DateTime(date.year, 1, 1)).inDays + 1;
+    final index = (dayOfYear - 1).clamp(0, _all.length - 1);
+    return _all[index];
+  }
+
+  /// Devocional por número do dia no ano (1..366).
+  static Devotional forDayOfYear(int day) {
+    if (_all.isEmpty) return _fallback;
+    final index = (day - 1).clamp(0, _all.length - 1);
+    return _all[index];
+  }
+
+  /// Usado apenas se o asset não puder ser lido (nunca deve acontecer em uso normal).
+  static const Devotional _fallback = Devotional(
+    dayOfYear: 1,
+    month: 1,
+    dayOfMonth: 1,
+    monthName: 'Janeiro',
+    reading: '',
+    title: 'Âncora da Alma',
+    verse: 'Temos esta esperança como âncora da alma, firme e segura.',
     verseRef: 'Hebreus 6:19',
-    verse:
-        'Temos esta esperança como âncora da alma, firme e segura.',
-    title: 'Âncora para a alma',
     body:
         'As ondas da vida vêm e vão, mas a esperança em Deus é uma âncora que não se move. '
         'Mesmo quando tudo parece instável, há algo firme para segurar. '
         'Agarre-se a essa âncora e deixe que ela mantenha o seu coração em paz.',
-  ),
-  Devotional(
-    id: 4,
-    verseRef: '2 Coríntios 5:7',
-    verse: 'Porque andamos por fé, e não por vista.',
-    title: 'Andar por fé',
-    body:
-        'Andar por vista é reagir apenas ao que se vê; andar por fé é responder àquilo que Deus prometeu. '
-        'A fé transforma a forma como encaramos as dificuldades. '
-        'Que hoje os seus passos sejam guiados pela confiança em Deus, e não pelo medo.',
-  ),
-  Devotional(
-    id: 5,
-    verseRef: 'Filipenses 4:6-7',
-    verse:
-        'Não andeis ansiosos por coisa alguma; antes, as vossas petições sejam conhecidas diante de Deus pela oração.',
-    title: 'Paz no lugar da ansiedade',
-    body:
-        'A ansiedade tenta ocupar o nosso coração, mas a oração abre espaço para a paz. '
-        'Leve a Deus cada preocupação, por menor que pareça. '
-        'Ele promete uma paz que excede todo entendimento, guardando o seu coração e a sua mente.',
-  ),
-  Devotional(
-    id: 6,
-    verseRef: 'Lamentações 3:22-23',
-    verse:
-        'As misericórdias do Senhor são a causa de não sermos consumidos, porque as suas misericórdias não têm fim; renovam-se cada manhã.',
-    title: 'Novas cada manhã',
-    body:
-        'Cada novo dia é uma prova do amor renovado de Deus. '
-        'O que passou não define o que está por vir. '
-        'Receba este dia como um presente e recomece com esperança.',
-  ),
-  Devotional(
-    id: 7,
-    verseRef: 'Filipenses 4:13',
-    verse: 'Posso todas as coisas naquele que me fortalece.',
-    title: 'Força que vem de Deus',
-    body:
-        'Não é pela nossa própria força que vencemos, mas pela força que Deus nos dá. '
-        'Quando a energia acaba, Ele renova. '
-        'Enfrente o dia com a certeza de que você não está sozinho.',
-  ),
-];
-
-/// Retorna o devocional do dia, baseado no dia do ano.
-Devotional devotionalForDate(DateTime date) {
-  final dayOfYear = date.difference(DateTime(date.year, 1, 1)).inDays;
-  return _devotionals[dayOfYear % _devotionals.length];
+    prayer:
+        'Senhor, firma o meu coração na Tua esperança e guarda os meus passos. Amém.',
+    impact: 'A esperança em Deus é a âncora que mantém a alma firme.',
+  );
 }
 
-/// Quantidade de devocionais disponíveis (útil para testes).
-int get devotionalCount => _devotionals.length;
+/// Retorna o devocional do dia, baseado na data.
+Devotional devotionalForDate(DateTime date) => DevotionalLibrary.forDate(date);
+
+/// Quantidade de devocionais disponíveis.
+int get devotionalCount => DevotionalLibrary.count;

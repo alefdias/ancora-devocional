@@ -82,6 +82,17 @@ class _AudioScreenState extends ConsumerState<AudioScreen> {
         child: Column(
           children: [
             const SizedBox(height: 8),
+            if (_devotional.reading.isNotEmpty) ...[
+              Text(
+                'Leitura bíblica: ${_devotional.reading}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             Text(
               _devotional.verseRef,
               style: const TextStyle(

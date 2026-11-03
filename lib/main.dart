@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
+import 'data/devotionals.dart';
 import 'providers.dart';
 import 'services/ad_service.dart';
 import 'services/tts_service.dart';
@@ -19,6 +20,9 @@ Future<void> main() async {
   }
 
   final prefs = await SharedPreferences.getInstance();
+
+  // Devocionais reais (366 dias) — carregados do asset local.
+  await DevotionalLibrary.load();
 
   // Anúncios e TTS: inicializam de forma segura.
   await AdService.instance.initialize();
