@@ -131,34 +131,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.border),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.menu_book_rounded,
-                    size: 18,
-                    color: AppColors.gold,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Plano de leitura',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      devotional.reading,
-                      textAlign: TextAlign.end,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.navy,
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.menu_book_rounded,
+                        size: 18,
+                        color: AppColors.gold,
                       ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Plano de leitura',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    devotional.reading,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.navy,
+                      height: 1.35,
                     ),
                   ),
                 ],
