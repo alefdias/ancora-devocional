@@ -23,7 +23,10 @@ class _AudioScreenState extends ConsumerState<AudioScreen> {
   @override
   void initState() {
     super.initState();
-    _devotional = devotionalForDate(DateTime.now());
+    _devotional = devotionalForDate(
+      DateTime.now(),
+      religion: ref.read(religionProvider),
+    );
     _unlocked =
         ref.read(sharedPrefsProvider).getString('unlockedAudioDate') ==
         dateKey(DateTime.now());
@@ -84,7 +87,9 @@ class _AudioScreenState extends ConsumerState<AudioScreen> {
             const SizedBox(height: 8),
             if (_devotional.reading.isNotEmpty) ...[
               Text(
-                'Leitura bíblica: ${_devotional.reading}',
+                _devotional.isCatholic
+                    ? 'Leituras do dia: ${_devotional.reading}'
+                    : 'Leitura bíblica: ${_devotional.reading}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: AppColors.textMuted,

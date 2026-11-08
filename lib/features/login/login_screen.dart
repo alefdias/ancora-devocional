@@ -34,9 +34,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _afterAuth() async {
-    final hasName = ref.read(nameProvider).isNotEmpty;
+    // No primeiro login (ou em um aparelho novo), a religião ainda não foi
+    // escolhida: manda para o onboarding para o usuário escolher a trilha.
+    final hasReligion = ref.read(religionProvider).isNotEmpty;
     if (!mounted) return;
-    context.go(hasName ? '/' : '/onboarding');
+    context.go(hasReligion ? '/' : '/onboarding');
   }
 
   // -------------------------------------------------------------------------
@@ -340,8 +342,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 // Acesso de teste (sem Firebase) para rodar no Linux/desktop
                 TextButton(
-                  onPressed: () =>
-                      context.go(ref.read(nameProvider).isEmpty ? '/onboarding' : '/'),
+                  onPressed: () => context.go(
+                    ref.read(religionProvider).isEmpty ? '/onboarding' : '/',
+                  ),
                   child: const Text(
                     'Entrar sem conta (teste)',
                     style: TextStyle(color: Colors.white54, fontSize: 13),

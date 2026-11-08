@@ -14,7 +14,16 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _nameController = TextEditingController();
-  String _religion = 'evangelico';
+
+  // Começa sem seleção para obrigar o usuário a escolher no primeiro login.
+  String? _religion;
+
+  @override
+  void initState() {
+    super.initState();
+    final salva = ref.read(religionProvider);
+    _religion = salva.isEmpty ? null : salva;
+  }
 
   @override
   void dispose() {
@@ -23,11 +32,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _start() {
+    final religion = _religion;
+    if (religion == null) return;
     final name = _nameController.text.trim();
     if (name.isNotEmpty) {
       ref.read(nameProvider.notifier).set(name);
     }
-    ref.read(religionProvider.notifier).set(_religion);
+    ref.read(religionProvider.notifier).set(religion);
     context.go('/');
   }
 
@@ -97,7 +108,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   Expanded(
                     child: _ReligionCard(
                       title: 'Católico',
-                      subtitle: 'Em breve',
+                      subtitle: 'Liturgia diária',
                       icon: Icons.church_rounded,
                       selected: _religion == 'catolico',
                       onTap: () => setState(() => _religion = 'catolico'),
@@ -105,8 +116,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
-              ElevatedButton(onPressed: _start, child: const Text('Começar')),
+              if (_religion == null) ...[
+                const SizedBox(height: 10),
+                const Text(
+                  'Escolha uma opção para continuar.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _religion == null ? null : _start,
+                child: const Text('Começar'),
+              ),
               const SizedBox(height: 24),
             ],
           ),

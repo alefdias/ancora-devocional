@@ -1,4 +1,4 @@
-name: Build APK (Âncora)
+name: Build Android (APK + AAB)
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build Release APK
+    name: Build Release APK e AAB
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -34,24 +34,38 @@ jobs:
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
 
+      - name: Build AAB
+        run: flutter build appbundle --release --no-tree-shake-icons
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
-        continue-on-error: true
         with:
-          name: app-release.apk
+          name: ancora-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 7
+          retention-days: 14
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ancora-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 14
 
       - name: Publish to GitHub Releases
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Âncora: Devocional - APK"
+          name: "Âncora: Devocional — APK e AAB"
           body: |
-            APK de teste do **Âncora: Devocional**.
-            - **app-release.apk**: instalável diretamente no celular (Android).
+            Build automático do **Âncora: Devocional**.
+
+            - **app-release.apk**: instalar diretamente no Android.
+            - **app-release.aab**: pacote para testes no Google Play Console.
+
+            > Assinado com a chave de debug. Para publicar na Play Store, configure a keystore de release.
           files: |
             build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

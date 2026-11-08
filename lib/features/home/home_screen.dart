@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme.dart';
 import '../../data/devotionals.dart';
+import '../../models.dart';
 import '../../providers.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -24,12 +25,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   String _todayLabel() {
     const weekdays = [
-      'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira',
-      'Sexta-feira', 'Sábado', 'Domingo',
+      'Segunda-feira',
+      'Terça-feira',
+      'Quarta-feira',
+      'Quinta-feira',
+      'Sexta-feira',
+      'Sábado',
+      'Domingo',
     ];
     const months = [
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
     final now = DateTime.now();
     return '${weekdays[now.weekday - 1]}, ${now.day} de ${months[now.month - 1]}';
@@ -37,10 +53,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final devotional = devotionalForDate(DateTime.now());
+    final religion = ref.watch(religionProvider);
+    final devotional = devotionalForDate(DateTime.now(), religion: religion);
     final streak = ref.watch(streakProvider);
     final name = ref.watch(nameProvider);
-    final religion = ref.watch(religionProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -57,7 +73,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             padding: const EdgeInsets.only(right: 12),
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.goldSoft,
                   borderRadius: BorderRadius.circular(20),
@@ -78,36 +97,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
-          if (religion == 'catolico') ...[
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppColors.goldSoft,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.gold),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.church_rounded, color: AppColors.navy, size: 22),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Conteúdo católico em breve! Por enquanto, você verá o devocional evangélico.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.navy,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
           Text(
             _todayLabel(),
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+            ),
           ),
           if (name.isNotEmpty) ...[
             const SizedBox(height: 2),
@@ -122,49 +117,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
           const SizedBox(height: 16),
 
-          // Plano de leitura do dia
-          if (devotional.reading.isNotEmpty) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.menu_book_rounded,
-                        size: 18,
-                        color: AppColors.gold,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Plano de leitura',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    devotional.reading,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.navy,
-                      height: 1.35,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // Plano de leitura (evangélico) ou liturgia do dia (católico)
+          if (devotional.isCatholic) ...[
+            _LiturgyCard(devotional: devotional),
+            const SizedBox(height: 14),
+          ] else if (devotional.reading.isNotEmpty) ...[
+            _ReadingCard(reading: devotional.reading),
             const SizedBox(height: 14),
           ],
 
@@ -225,8 +183,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _Paragraphs(devotional.body),
           const SizedBox(height: 20),
 
-          // Frase de impacto
+          // Frase de impacto (evangélico) / Propósito do dia (católico)
           if (devotional.impact.isNotEmpty) ...[
+            _SectionTitle(
+              devotional.isCatholic ? 'Propósito do dia' : 'Frase de impacto',
+            ),
+            const SizedBox(height: 10),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -292,6 +254,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 24),
+          ],
+
+          // Desafio semanal (edição católica)
+          if (devotional.challenge != null) ...[
+            const _SectionTitle('Desafio da semana'),
+            const SizedBox(height: 10),
+            _ChallengeCard(challenge: devotional.challenge!),
             const SizedBox(height: 24),
           ],
 
@@ -431,6 +401,260 @@ class _Paragraphs extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _ReadingCard extends StatelessWidget {
+  const _ReadingCard({required this.reading});
+
+  final String reading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.menu_book_rounded, size: 18, color: AppColors.gold),
+              SizedBox(width: 8),
+              Text(
+                'Plano de leitura',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            reading,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: AppColors.navy,
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LiturgyCard extends StatelessWidget {
+  const _LiturgyCard({required this.devotional});
+
+  final Devotional devotional;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.church_rounded, size: 18, color: AppColors.gold),
+              SizedBox(width: 8),
+              Text(
+                'Liturgia do dia',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            devotional.celebration,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: AppColors.navy,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              if (devotional.degree.isNotEmpty) _InfoChip(devotional.degree),
+              if (devotional.liturgicalTime.isNotEmpty)
+                _InfoChip(devotional.liturgicalTime),
+              if (devotional.liturgicalColor.isNotEmpty)
+                _InfoChip('Cor: ${devotional.liturgicalColor}'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _InfoLine(label: 'Leituras', value: devotional.readings),
+          _InfoLine(label: 'Evangelho', value: devotional.gospel),
+          if (devotional.saint.isNotEmpty)
+            _InfoLine(label: 'Santo do dia', value: devotional.saint),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.goldSoft,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: AppColors.navy,
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoLine extends StatelessWidget {
+  const _InfoLine({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    if (value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(
+            fontSize: 12.5,
+            height: 1.4,
+            color: AppColors.textSecondary,
+          ),
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: AppColors.navy,
+              ),
+            ),
+            TextSpan(text: value),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ChallengeCard extends StatelessWidget {
+  const _ChallengeCard({required this.challenge});
+
+  final Challenge challenge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.goldSoft,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.gold),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${challenge.title} · ${challenge.category}',
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: AppColors.navy,
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            challenge.subtitle,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: AppColors.navy,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            challenge.goal,
+            style: const TextStyle(
+              fontSize: 13.5,
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            challenge.explanation,
+            style: const TextStyle(
+              fontSize: 12.5,
+              color: AppColors.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          if (challenge.quote.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              '“${challenge.quote}”',
+              style: const TextStyle(
+                fontSize: 13,
+                fontStyle: FontStyle.italic,
+                color: AppColors.navy,
+                height: 1.45,
+              ),
+            ),
+            if (challenge.reference.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  challenge.reference,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.gold,
+                  ),
+                ),
+              ),
+          ],
+        ],
+      ),
     );
   }
 }

@@ -34,7 +34,7 @@ class SettingsScreen extends ConsumerWidget {
                   leading: const Icon(Icons.menu_book_rounded, color: AppColors.gold),
                   title: const Text('Afiliação religiosa'),
                   subtitle: Text(
-                    religion == 'catolico' ? 'Católico (em breve)' : 'Evangélico',
+                    religion == 'catolico' ? 'Católico' : 'Evangélico',
                   ),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _editReligion(context, ref),
@@ -145,7 +145,7 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 Icon(Icons.church_rounded, color: AppColors.gold),
                 SizedBox(width: 12),
-                Text('Católico (em breve)'),
+                Text('Católico'),
               ],
             ),
           ),
