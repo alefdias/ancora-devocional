@@ -62,6 +62,21 @@ flutter build apk --debug   # APK de teste
 flutter build appbundle     # Play Store (release)
 ```
 
+### Build automático no GitHub
+
+Todo push na branch `main` dispara o workflow **Build Android (APK + AAB)**
+(`.github/workflows/build_apk.yml`), que:
+
+1. compila `app-release.apk`;
+2. compila `app-release.aab`;
+3. publica os dois arquivos como artifacts do Actions;
+4. atualiza a release **`latest`** em <https://github.com/alefdias/ancora-devocional/releases/latest>.
+
+Também pode ser disparado manualmente em **Actions → Build Android (APK + AAB) → Run workflow**.
+
+> O build usa a keystore de **debug** (arquivo `android/app/debug.keystore`). Serve para testes;
+> para publicar na Play Store é preciso configurar uma keystore de release.
+
 ### Testes e análise
 
 ```bash
